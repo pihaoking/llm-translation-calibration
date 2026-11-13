@@ -32,7 +32,7 @@ DATA_DIR = BASE_DIR / "data" / "processed"
 RESULTS_DIR = BASE_DIR / "results"
 FIG_DIR = BASE_DIR / "figures"
 
-# ======== Helper ========
+# helper
 
 def load_gold(lang, split="dev"):
     with open(DATA_DIR / f"{lang}_{split}.json") as f:
@@ -66,7 +66,7 @@ def evaluate_all(result_file, gold_data):
     return per_prompt
 
 
-# ======== Analysis 1: Cross-language (Haiku) ========
+# analysis 1: Cross-language (Haiku)
 
 def analysis_cross_language():
     """语言复杂度 vs 校准性"""
@@ -177,7 +177,7 @@ def analysis_cross_language():
     return results
 
 
-# ======== Analysis 2: Prompt difficulty ========
+# analysis 2: Prompt difficulty
 
 def analysis_prompt_difficulty():
     """翻译变体数 (prompt 难度) vs 校准性"""
@@ -248,7 +248,7 @@ def analysis_prompt_difficulty():
     print(f"  Correlation (n_gold vs JS): r={corr_js:.3f}, p={pval_js:.4f}")
 
 
-# ======== Analysis 3: Case studies ========
+# analysis 3: Case studies
 
 def analysis_case_studies():
     """最好/最差 prompt 案例"""
@@ -302,7 +302,7 @@ def analysis_case_studies():
     print("  Saved analysis_length_vs_js.png")
 
 
-# ======== Analysis 4: Phantom translation analysis ========
+# analysis 4: Phantom translation analysis
 
 def analysis_phantom():
     """Phantom 翻译深入分析"""
@@ -378,7 +378,7 @@ def analysis_phantom():
     print("  Saved analysis_phantom.png")
 
 
-# ======== Analysis 5: Summary statistics table ========
+# analysis 5: Summary statistics table
 
 def analysis_summary_table():
     """生成完整汇总表 (JSON)"""
@@ -431,7 +431,7 @@ def analysis_summary_table():
               f"{e['ece']:>8.3f} {e.get('wr@10', 0):>8.3f}")
 
 
-# ======== Main ========
+# main
 
 def main():
     print("=" * 60)
