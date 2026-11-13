@@ -1,0 +1,8 @@
+numpy
+scipy
+matplotlib
+seaborn
+tqdm
+requests
+anthropic
+openai

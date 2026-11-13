@@ -1,0 +1,20 @@
+{
+  "label": "dryrun_good",
+  "lang": "en_pt",
+  "split": "dev",
+  "n_prompts": 50,
+  "spearman_rho_mean": 0.4977090615746379,
+  "spearman_rho_std": 0.334075042070039,
+  "js_divergence_mean": 0.27117252174866696,
+  "js_divergence_std": 0.14601958714233704,
+  "ece": 0.009415648109127742,
+  "wr@1": 0.2788558655654186,
+  "wr@5": 0.48911053488734557,
+  "wr@10": 0.5489339382908685,
+  "wr@20": 0.5912443225009357,
+  "failure_modes": {
+    "rank_misaligned": 14,
+    "overconfident": 12,
+    "well_calibrated": 24
+  }
+}

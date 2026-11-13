@@ -1,0 +1,21 @@
+{
+  "label": "haiku_en_ko",
+  "lang": "en_ko",
+  "split": "dev",
+  "n_prompts": 500,
+  "spearman_rho_mean": 0.40750407241515385,
+  "spearman_rho_std": 0.3944877941908524,
+  "js_divergence_mean": 0.8061887895898672,
+  "js_divergence_std": 0.15601374330898626,
+  "ece": 0.06170325573651604,
+  "wr@1": 0.03584635234784262,
+  "wr@5": 0.08599750888032875,
+  "wr@10": 0.1122359718253262,
+  "wr@20": 0.14230662873368327,
+  "failure_modes": {
+    "phantom": 312,
+    "overconfident": 178,
+    "well_calibrated": 6,
+    "rank_misaligned": 4
+  }
+}

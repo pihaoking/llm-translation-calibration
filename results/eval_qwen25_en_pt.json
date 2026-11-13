@@ -1,0 +1,20 @@
+{
+  "label": "qwen25_en_pt",
+  "lang": "en_pt",
+  "split": "dev",
+  "n_prompts": 500,
+  "spearman_rho_mean": 0.4339421599371441,
+  "spearman_rho_std": 0.5225492638494613,
+  "js_divergence_mean": 0.9395074436410207,
+  "js_divergence_std": 0.12394404264193523,
+  "ece": 0.09415060990901526,
+  "wr@1": 0.03337441450858172,
+  "wr@5": 0.05556223694902142,
+  "wr@10": 0.060894114910846134,
+  "wr@20": 0.061931559943728,
+  "failure_modes": {
+    "phantom": 498,
+    "rank_misaligned": 1,
+    "overconfident": 1
+  }
+}

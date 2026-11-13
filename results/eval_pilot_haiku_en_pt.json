@@ -1,0 +1,19 @@
+{
+  "label": "pilot_haiku_en_pt",
+  "lang": "en_pt",
+  "split": "dev",
+  "n_prompts": 5,
+  "spearman_rho_mean": 0.7632766174050307,
+  "spearman_rho_std": 0.14091133014829077,
+  "js_divergence_mean": 0.5550848935891338,
+  "js_divergence_std": 0.14006245381426813,
+  "ece": 0.04742896319474797,
+  "wr@1": 0.23154641072629722,
+  "wr@5": 0.319070454992668,
+  "wr@10": 0.3713950790065164,
+  "wr@20": 0.38311666301826247,
+  "failure_modes": {
+    "overconfident": 3,
+    "phantom": 2
+  }
+}

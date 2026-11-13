@@ -1,0 +1,106 @@
+[
+  {
+    "label": "haiku_en_hu",
+    "lang": "en_hu",
+    "split": "dev",
+    "n_prompts": 500,
+    "spearman_rho_mean": 0.4445058595524501,
+    "spearman_rho_std": 0.47270163602990256,
+    "js_divergence_mean": 0.7163523136127705,
+    "js_divergence_std": 0.23623757585901697,
+    "ece": 0.045774441636113446,
+    "wr@1": 0.12312124590661669,
+    "wr@5": 0.2451889302429558,
+    "wr@10": 0.2871812965618933,
+    "wr@20": 0.3180298112479847,
+    "failure_modes": {
+      "phantom": 444,
+      "well_calibrated": 14,
+      "overconfident": 30,
+      "rank_misaligned": 12
+    },
+    "model": "Claude Haiku"
+  },
+  {
+    "label": "haiku_en_ja",
+    "lang": "en_ja",
+    "split": "dev",
+    "n_prompts": 500,
+    "spearman_rho_mean": 0.38902389161125156,
+    "spearman_rho_std": 0.38270048067222584,
+    "js_divergence_mean": 0.8461400776384174,
+    "js_divergence_std": 0.1265584418940198,
+    "ece": 0.0636935913749738,
+    "wr@1": 0.027151803366046615,
+    "wr@5": 0.06166833561025726,
+    "wr@10": 0.08182649673925314,
+    "wr@20": 0.10063986485728539,
+    "failure_modes": {
+      "phantom": 351,
+      "overconfident": 149
+    },
+    "model": "Claude Haiku"
+  },
+  {
+    "label": "haiku_en_ko",
+    "lang": "en_ko",
+    "split": "dev",
+    "n_prompts": 500,
+    "spearman_rho_mean": 0.40750407241515385,
+    "spearman_rho_std": 0.3944877941908524,
+    "js_divergence_mean": 0.8061887895898672,
+    "js_divergence_std": 0.15601374330898626,
+    "ece": 0.06170325573651604,
+    "wr@1": 0.03584635234784262,
+    "wr@5": 0.08599750888032875,
+    "wr@10": 0.1122359718253262,
+    "wr@20": 0.14230662873368327,
+    "failure_modes": {
+      "phantom": 312,
+      "overconfident": 178,
+      "well_calibrated": 6,
+      "rank_misaligned": 4
+    },
+    "model": "Claude Haiku"
+  },
+  {
+    "label": "llama32_en_pt",
+    "lang": "en_pt",
+    "split": "dev",
+    "n_prompts": 500,
+    "spearman_rho_mean": 0.591560092170385,
+    "spearman_rho_std": 0.33613144295903324,
+    "js_divergence_mean": 0.9676305603863281,
+    "js_divergence_std": 0.09556124071662694,
+    "ece": 0.08614173375902712,
+    "wr@1": 0.0189550644117609,
+    "wr@5": 0.0309106276715266,
+    "wr@10": 0.03268806945097669,
+    "wr@20": 0.033996673312926655,
+    "failure_modes": {
+      "phantom": 500
+    },
+    "model": "Llama 3.2 3B"
+  },
+  {
+    "label": "qwen25_en_pt",
+    "lang": "en_pt",
+    "split": "dev",
+    "n_prompts": 500,
+    "spearman_rho_mean": 0.4339421599371441,
+    "spearman_rho_std": 0.5225492638494613,
+    "js_divergence_mean": 0.9395074436410207,
+    "js_divergence_std": 0.12394404264193523,
+    "ece": 0.09415060990901526,
+    "wr@1": 0.03337441450858172,
+    "wr@5": 0.05556223694902142,
+    "wr@10": 0.060894114910846134,
+    "wr@20": 0.061931559943728,
+    "failure_modes": {
+      "phantom": 498,
+      "rank_misaligned": 1,
+      "overconfident": 1
+    },
+    "model": "Qwen 2.5 7B"
+  }
+]

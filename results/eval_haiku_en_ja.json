@@ -1,0 +1,19 @@
+{
+  "label": "haiku_en_ja",
+  "lang": "en_ja",
+  "split": "dev",
+  "n_prompts": 500,
+  "spearman_rho_mean": 0.38902389161125156,
+  "spearman_rho_std": 0.38270048067222584,
+  "js_divergence_mean": 0.8461400776384174,
+  "js_divergence_std": 0.1265584418940198,
+  "ece": 0.0636935913749738,
+  "wr@1": 0.027151803366046615,
+  "wr@5": 0.06166833561025726,
+  "wr@10": 0.08182649673925314,
+  "wr@20": 0.10063986485728539,
+  "failure_modes": {
+    "phantom": 351,
+    "overconfident": 149
+  }
+}

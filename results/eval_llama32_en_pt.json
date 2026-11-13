@@ -1,0 +1,18 @@
+{
+  "label": "llama32_en_pt",
+  "lang": "en_pt",
+  "split": "dev",
+  "n_prompts": 500,
+  "spearman_rho_mean": 0.591560092170385,
+  "spearman_rho_std": 0.33613144295903324,
+  "js_divergence_mean": 0.9676305603863281,
+  "js_divergence_std": 0.09556124071662694,
+  "ece": 0.08614173375902712,
+  "wr@1": 0.0189550644117609,
+  "wr@5": 0.0309106276715266,
+  "wr@10": 0.03268806945097669,
+  "wr@20": 0.033996673312926655,
+  "failure_modes": {
+    "phantom": 500
+  }
+}
