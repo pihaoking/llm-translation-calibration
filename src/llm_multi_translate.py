@@ -1,10 +1,8 @@
 """
-LLM 多翻译管线 (改进版路线 B)。
+LLM 多翻译管线。
 
 每个 prompt 一次 API 调用，让模型生成尽可能多的合理翻译变体。
 用排名 + 指数衰减构建概率分布。
-
-成本极低: 500 prompts × 1 call ≈ $0.15 (Haiku) / $0.45 (Sonnet)
 
 用法:
   python src/llm_multi_translate.py --lang en_pt --split dev --model claude-haiku --max_prompts 5

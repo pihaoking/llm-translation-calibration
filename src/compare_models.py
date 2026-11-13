@@ -332,18 +332,15 @@ def main():
     summaries.sort(key=lambda s: s["spearman_rho"] or 0, reverse=True)
 
     # 打印汇总
-    print(f"\n{'='*80}")
+    print()
     print(f"  CROSS-MODEL COMPARISON: {args.lang} ({args.split})")
-    print(f"{'='*80}")
     print(f"{'Model':<20} {'Params':>8} {'ρ':>8} {'JS':>8} {'ECE':>8} {'WR@10':>8} {'Phantom':>8} {'Good':>8}")
-    print(f"{'-'*80}")
     for s in summaries:
         rho = f"{s['spearman_rho']:.3f}" if s["spearman_rho"] else "N/A"
         js = f"{s['js_divergence']:.3f}" if s["js_divergence"] else "N/A"
         print(f"{s['model']:<20} {s['params']:>8} {rho:>8} {js:>8} "
               f"{s['ece']:>8.3f} {s['wr@10']:>8.3f} "
               f"{s['phantom_rate']:>7.1%} {s['well_calibrated_rate']:>7.1%}")
-    print(f"{'='*80}")
 
     # 生成图表
     print("\nGenerating comparison plots...")

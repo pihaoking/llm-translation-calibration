@@ -180,10 +180,9 @@ def fig5_sentence_length_vs_entropy():
 
 def print_summary_table():
     """打印汇总统计表"""
-    print("\n" + "=" * 90)
+    print()
     print(f"{'Lang':<8} {'Prompts':>8} {'Total Trans':>12} {'Avg Trans':>10} "
           f"{'Avg Entropy':>12} {'Avg Top1%':>10} {'Avg Top5%':>10} {'Avg Top10%':>11}")
-    print("=" * 90)
 
     for lang in LANG_PAIRS:
         prompts = load_data(lang)
@@ -198,7 +197,6 @@ def print_summary_table():
         print(f"{LANG_LABELS[lang]:<8} {n:>8} {total:>12} {avg_trans:>10.1f} "
               f"{avg_ent:>12.2f} {avg_t1:>9.1f}% {avg_t5:>9.1f}% {avg_t10:>10.1f}%")
 
-    print("=" * 90)
 
 
 def main():

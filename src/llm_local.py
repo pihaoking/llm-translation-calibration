@@ -2,7 +2,6 @@
 本地模型多翻译管线 (via Ollama)。
 
 通过 Ollama 的 OpenAI-compatible API 调用本地模型。
-零成本，可并行跑多个模型。
 
 支持: phi4:14b, gemma2:27b, llama3.2, qwen2.5:7b 等 Ollama 模型
 

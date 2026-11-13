@@ -114,10 +114,9 @@ def run_evaluation(result_path, lang, split, label=None):
     }
 
     # 打印
-    print(f"\n{'='*60}")
+    print()
     print(f"  Evaluation: {label}")
     print(f"  Lang: {lang}, Split: {split}, Prompts: {summary['n_prompts']}")
-    print(f"{'='*60}")
     print(f"  Spearman ρ:     {summary['spearman_rho_mean']:.4f} ± {summary['spearman_rho_std']:.4f}")
     print(f"  JS Divergence:  {summary['js_divergence_mean']:.4f} ± {summary['js_divergence_std']:.4f}")
     print(f"  ECE:            {summary['ece']:.4f}")
@@ -126,7 +125,6 @@ def run_evaluation(result_path, lang, split, label=None):
     print(f"  WR@10:          {summary['wr@10']:.4f}")
     print(f"  WR@20:          {summary['wr@20']:.4f}")
     print(f"  Failure modes:  {mode_counts}")
-    print(f"{'='*60}")
 
     # 生成图表
     plot_reliability_diagram(ece_bins, label)

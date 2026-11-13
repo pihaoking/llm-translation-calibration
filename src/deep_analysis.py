@@ -423,7 +423,6 @@ def analysis_summary_table():
 
     # Print table
     print(f"\n  {'Model':<20} {'Lang':>6} {'ρ':>8} {'JS':>8} {'ECE':>8} {'WR@10':>8}")
-    print(f"  {'-'*60}")
     for e in all_evals:
         rho = f"{e['spearman_rho_mean']:.3f}" if e.get("spearman_rho_mean") else "N/A"
         js = f"{e['js_divergence_mean']:.3f}" if e.get("js_divergence_mean") else "N/A"
@@ -434,9 +433,7 @@ def analysis_summary_table():
 # main
 
 def main():
-    print("=" * 60)
     print("  DEEP ANALYSIS: LLM Calibration in Educational Translation")
-    print("=" * 60)
 
     analysis_cross_language()
     analysis_prompt_difficulty()
@@ -444,9 +441,8 @@ def main():
     analysis_phantom()
     analysis_summary_table()
 
-    print("\n" + "=" * 60)
+    print()
     print("  All analyses complete!")
-    print("=" * 60)
 
 
 if __name__ == "__main__":
