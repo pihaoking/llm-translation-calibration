@@ -1,8 +1,4 @@
-"""
-STAPLE 数据集描述性统计与可视化。
-
-生成图表保存到 figures/ 目录。
-"""
+"""STAPLE 数据集描述性统计与可视化"""
 
 import json
 import numpy as np
@@ -158,7 +154,6 @@ def fig5_sentence_length_vs_entropy():
         entropies = [p["entropy"] for p in prompts]
 
         axes[i].scatter(lengths, entropies, alpha=0.3, s=10, color=colors[i])
-        # 趋势线
         z = np.polyfit(lengths, entropies, 1)
         x_line = np.linspace(min(lengths), max(lengths), 100)
         axes[i].plot(x_line, np.polyval(z, x_line), color="red", linewidth=1.5,

@@ -1,15 +1,6 @@
-"""
-深度分析脚本：生成论文所需的进阶分析和图表。
+"""深度分析脚本：生成论文所需的进阶分析和图表
 
-分析内容:
-1. 语言复杂度 vs 校准性 (跨语言 Haiku)
-2. 模型规模 vs 校准性 (跨模型 en_pt)
-3. Prompt 难度分析 (翻译变体数 vs 校准性)
-4. Phantom 翻译错误分析
-5. 案例研究 (最好/最差 prompt)
-
-用法:
-  python src/deep_analysis.py
+python src/deep_analysis.py
 """
 
 import json
@@ -32,7 +23,6 @@ DATA_DIR = BASE_DIR / "data" / "processed"
 RESULTS_DIR = BASE_DIR / "results"
 FIG_DIR = BASE_DIR / "figures"
 
-# helper
 
 def load_gold(lang, split="dev"):
     with open(DATA_DIR / f"{lang}_{split}.json") as f:
@@ -118,13 +108,11 @@ def analysis_cross_language():
             continue
         r = results[lang]
 
-        # Violin for rho
         parts1 = ax1.violinplot([r["rhos"]], positions=[i], showmeans=True, showmedians=True)
         for pc in parts1["bodies"]:
             pc.set_facecolor(colors[i])
             pc.set_alpha(0.7)
 
-        # Violin for JS
         parts2 = ax2.violinplot([r["jss"]], positions=[i], showmeans=True, showmedians=True)
         for pc in parts2["bodies"]:
             pc.set_facecolor(colors[i])
@@ -191,7 +179,6 @@ def analysis_prompt_difficulty():
     rhos = [r["spearman_rho"] for r in pp]
     jss = [r["js_divergence"] for r in pp]
 
-    # 分成难度组
     bins = [0, 10, 20, 40, 80, 200, float("inf")]
     labels = ["1-10", "11-20", "21-40", "41-80", "81-200", "200+"]
     groups = {l: {"rhos": [], "jss": []} for l in labels}
@@ -204,7 +191,6 @@ def analysis_prompt_difficulty():
                 groups[labels[i]]["jss"].append(js)
                 break
 
-    # Plot
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
     valid_labels = [l for l in labels if groups[l]["rhos"]]
@@ -237,7 +223,6 @@ def analysis_prompt_difficulty():
     plt.close(fig)
     print("  Saved analysis_prompt_difficulty.png")
 
-    # 相关性
     valid = [(ng, rho) for ng, rho in zip(n_golds, rhos) if not np.isnan(rho)]
     if valid:
         ngs, rs = zip(*valid)
@@ -258,7 +243,6 @@ def analysis_case_studies():
     gold = load_gold("en_pt")
     pp = evaluate_all(result_file, gold)
 
-    # 按 JS divergence 排序
     pp_sorted = sorted(pp, key=lambda r: r["js_divergence"])
 
     print("--- Best calibrated (lowest JS divergence) ---")
@@ -289,7 +273,6 @@ def analysis_case_studies():
     ax.set_title(f"Sentence Length vs Calibration Error (r={corr:.3f})")
     ax.grid(alpha=0.3)
 
-    # 趋势线
     z = np.polyfit(eng_lens, jss, 1)
     p = np.poly1d(z)
     xs = np.linspace(min(eng_lens), max(eng_lens), 100)
@@ -337,7 +320,6 @@ def analysis_phantom():
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
-    # Phantom mass distribution
     axes[0].hist(phantom_masses, bins=30, color="#ef4444", edgecolor="white", alpha=0.7)
     axes[0].axvline(np.mean(phantom_masses), color="black", ls="--",
                     label=f"Mean={np.mean(phantom_masses):.3f}")
@@ -346,7 +328,6 @@ def analysis_phantom():
     axes[0].set_title("Distribution of Phantom Mass")
     axes[0].legend()
 
-    # Phantom count ratio
     axes[1].hist(phantom_counts, bins=30, color="#f59e0b", edgecolor="white", alpha=0.7)
     axes[1].axvline(np.mean(phantom_counts), color="black", ls="--",
                     label=f"Mean={np.mean(phantom_counts):.1%}")
@@ -355,7 +336,6 @@ def analysis_phantom():
     axes[1].set_title("Fraction of Non-Gold Translations")
     axes[1].legend()
 
-    # Gold mass distribution
     axes[2].hist(total_probs_in_gold, bins=30, color="#10b981", edgecolor="white", alpha=0.7)
     axes[2].axvline(np.mean(total_probs_in_gold), color="black", ls="--",
                     label=f"Mean={np.mean(total_probs_in_gold):.3f}")
@@ -386,7 +366,6 @@ def analysis_summary_table():
 
     all_evals = []
 
-    # Claude Haiku across languages
     for lang in ["en_pt", "en_hu", "en_ja", "en_ko"]:
         result_file = RESULTS_DIR / f"multi_claude-haiku_{lang}_dev.json"
         if not result_file.exists():
@@ -398,7 +377,6 @@ def analysis_summary_table():
                 data["model"] = "Claude Haiku"
                 all_evals.append(data)
 
-    # Local models on en_pt
     for label, model_name in [("llama32_en_pt", "Llama 3.2 3B"),
                                ("qwen25_en_pt", "Qwen 2.5 7B")]:
         eval_file = RESULTS_DIR / f"eval_{label}.json"
@@ -408,7 +386,6 @@ def analysis_summary_table():
                 data["model"] = model_name
                 all_evals.append(data)
 
-    # Check for Phi-4
     eval_file = RESULTS_DIR / "eval_phi4_en_pt.json"
     if eval_file.exists():
         with open(eval_file) as f:
@@ -421,7 +398,6 @@ def analysis_summary_table():
         json.dump(all_evals, f, indent=2)
     print(f"  Saved {output_file}")
 
-    # Print table
     print(f"\n  {'Model':<20} {'Lang':>6} {'ρ':>8} {'JS':>8} {'ECE':>8} {'WR@10':>8}")
     for e in all_evals:
         rho = f"{e['spearman_rho_mean']:.3f}" if e.get("spearman_rho_mean") else "N/A"
@@ -430,7 +406,6 @@ def analysis_summary_table():
               f"{e['ece']:>8.3f} {e.get('wr@10', 0):>8.3f}")
 
 
-# main
 
 def main():
     print("  DEEP ANALYSIS: LLM Calibration in Educational Translation")

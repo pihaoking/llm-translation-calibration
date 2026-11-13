@@ -1,15 +1,6 @@
-"""
-LLM Scoring 管线 (路线 A)。
+"""LLM Scoring 管线 (路线 A)
 
-对 STAPLE 中每个 prompt 的所有已知翻译，计算 LLM 的条件 log-probability，
-然后做长度归一化 + softmax，得到 P_LLM(t|s)。
-
-支持:
-  - OpenAI GPT-4o (via API, logprobs)
-  - 本地开源模型 (via HuggingFace transformers) [预留接口]
-
-用法:
-  python src/llm_scoring.py --lang en_pt --split dev --model gpt-4o --max_prompts 10
+python src/llm_scoring.py --lang en_pt --split dev --model gpt-4o --max_prompts 10
 """
 
 import argparse
@@ -58,14 +49,7 @@ def score_translations_openai(
     model: str = "gpt-4o",
     batch_size: int = 1,
 ) -> dict:
-    """
-    用 OpenAI API 对每条翻译打分。
-
-    通过让模型在给定 prompt 后生成翻译文本，利用 logprobs 获取每个 token 的对数概率。
-
-    Returns:
-        {translation_text: normalized_logprob, ...}
-    """
+    """用 OpenAI API 对每条翻译打分"""
     scores = {}
     messages = build_messages(english, lang)
 
@@ -103,18 +87,7 @@ def score_translations_openai_batch(
     lang: str,
     model: str = "gpt-4o",
 ) -> dict:
-    """
-    替代方案: 用 OpenAI 的 completions API 计算翻译的 logprob。
-
-    思路: 将 system + user + assistant(translation) 拼成完整序列,
-    然后用 model 的 logprobs 来估计翻译质量。
-
-    实际实现: 我们让模型生成翻译, 同时开启 logprobs,
-    通过生成概率间接估计各翻译的可能性。
-
-    更实用的方案: 对每条翻译, 计算 prompt + translation 的 log-likelihood。
-    使用 /v1/chat/completions 的 logprobs 功能。
-    """
+    """替代方案: 用 OpenAI 的 completions API 计算翻译的 logprob"""
     scores = {}
     target_lang = LANG_NAMES[lang]
     system_msg = "You are a translator."
@@ -145,7 +118,6 @@ def score_translations_openai_batch(
                 ]
                 total_logprob = sum(token_logprobs)
                 n_tokens = len(token_logprobs)
-                # 长度归一化
                 normalized = total_logprob / n_tokens if n_tokens > 0 else -100
                 scores[text] = normalized
             else:
@@ -192,15 +164,12 @@ def run_scoring(lang, split, model, max_prompts=None, rate_limit_delay=0.1):
         english = prompt["english"]
         translations = prompt["translations"]
 
-        # 打分
         scores = score_translations_openai_batch(
             client, english, translations, lang, model
         )
 
-        # 转为概率
         p_llm = logprob_to_probability(scores)
 
-        # 保存
         results.append({
             "prompt_id": prompt["prompt_id"],
             "english": english,
@@ -210,10 +179,8 @@ def run_scoring(lang, split, model, max_prompts=None, rate_limit_delay=0.1):
             "num_total": len(translations),
         })
 
-        # Rate limiting
         time.sleep(rate_limit_delay)
 
-    # 保存结果
     output_file = RESULTS_DIR / f"scoring_{model}_{lang}_{split}.json"
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)

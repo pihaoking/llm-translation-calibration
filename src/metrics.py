@@ -1,32 +1,11 @@
-"""
-校准性评估指标模块。
-
-提供四个核心指标:
-1. Spearman Rank Correlation (ρ)
-2. Expected Calibration Error (ECE)
-3. Jensen-Shannon Divergence (JS)
-4. Weighted Recall@K (WR@K)
-
-以及辅助分析:
-- Reliability Diagram 数据
-- 失败模式分类
-"""
+"""校准性评估指标模块"""
 
 import numpy as np
 from scipy import stats
 
 
 def spearman_correlation(p_human: dict, p_llm: dict) -> float:
-    """
-    计算单个 prompt 的 Spearman rank correlation。
-
-    Args:
-        p_human: {translation_text: weight, ...} 人类翻译分布
-        p_llm:   {translation_text: score, ...}  LLM 概率/分数
-
-    Returns:
-        Spearman ρ (float), 若翻译数 < 3 则返回 NaN
-    """
+    """计算单个 prompt 的 Spearman rank correlation"""
     # 取两个分布的交集
     common = set(p_human.keys()) & set(p_llm.keys())
     if len(common) < 3:
@@ -44,18 +23,7 @@ def expected_calibration_error(
     all_p_llm: list[float],
     n_bins: int = 10,
 ) -> tuple[float, list[dict]]:
-    """
-    计算 ECE 并返回各 bin 的详情（用于 reliability diagram）。
-
-    Args:
-        all_p_human: 所有 (prompt, translation) 对的人类权重
-        all_p_llm:   对应的 LLM 概率
-        n_bins: bin 的数量
-
-    Returns:
-        (ece_value, bin_details)
-        bin_details: list of {avg_confidence, avg_frequency, count, bin_lower, bin_upper}
-    """
+    """计算 ECE 并返回各 bin 的详情（用于 reliability diagram）"""
     p_human = np.array(all_p_human)
     p_llm = np.array(all_p_llm)
     n = len(p_human)
@@ -89,31 +57,16 @@ def expected_calibration_error(
 
 
 def js_divergence(p_human: dict, p_llm: dict) -> float:
-    """
-    计算单个 prompt 的 Jensen-Shannon 散度。
-
-    两个分布需定义在同一支撑集上。对于只在一个分布中出现的翻译，
-    另一个分布赋予 0 概率，然后加 epsilon 平滑。
-
-    Args:
-        p_human: {translation_text: weight}
-        p_llm:   {translation_text: probability}
-
-    Returns:
-        JS divergence ∈ [0, 1] (使用 log base 2)
-    """
-    # 合并支撑集
+    """计算单个 prompt 的 Jensen-Shannon 散度"""
     all_keys = set(p_human.keys()) | set(p_llm.keys())
     if not all_keys:
         return 0.0
 
     eps = 1e-12
 
-    # 构建对齐的概率向量
     h = np.array([p_human.get(k, 0) for k in all_keys], dtype=np.float64)
     l = np.array([p_llm.get(k, 0) for k in all_keys], dtype=np.float64)
 
-    # 归一化（确保求和为 1）
     h = h / (h.sum() + eps)
     l = l / (l.sum() + eps)
 
@@ -129,19 +82,7 @@ def js_divergence(p_human: dict, p_llm: dict) -> float:
 
 
 def weighted_recall_at_k(p_human: dict, p_llm: dict, k: int) -> float:
-    """
-    计算 Weighted Recall@K。
-
-    LLM 概率最高的 K 个翻译在人类分布中覆盖了多少权重。
-
-    Args:
-        p_human: {translation: weight}
-        p_llm:   {translation: probability}
-        k: Top-K
-
-    Returns:
-        WR@K ∈ [0, 1]
-    """
+    """计算 Weighted Recall@K"""
     # LLM 排序取 Top-K
     top_k = sorted(p_llm.keys(), key=lambda t: p_llm[t], reverse=True)[:k]
 
@@ -150,27 +91,9 @@ def weighted_recall_at_k(p_human: dict, p_llm: dict, k: int) -> float:
 
 
 def classify_failure_mode(p_human: dict, p_llm: dict, rho: float) -> str:
-    """
-    对单个 prompt 的校准失败进行分类。
-
-    失败模式:
-    - "well_calibrated": 校准良好
-    - "overconfident": LLM 分布过于集中
-    - "underconfident": LLM 分布过于分散
-    - "rank_misaligned": 集中度相似但排序不一致
-    - "phantom": LLM 大量概率在 gold set 之外 (仅 Sampling 模式)
-
-    Args:
-        p_human: {translation: weight}
-        p_llm:   {translation: probability}
-        rho: 已计算的 Spearman ρ
-
-    Returns:
-        failure mode string
-    """
+    """对单个 prompt 的校准失败进行分类"""
     eps = 1e-12
 
-    # 计算两个分布的熵
     h_vals = np.array(list(p_human.values()))
     h_vals = h_vals / (h_vals.sum() + eps)
     entropy_human = -np.sum(h_vals * np.log(h_vals + eps))
@@ -198,17 +121,7 @@ def classify_failure_mode(p_human: dict, p_llm: dict, rho: float) -> str:
 
 
 def evaluate_prompt(p_human: dict, p_llm: dict, ks=(1, 5, 10, 20)) -> dict:
-    """
-    对单个 prompt 计算所有指标。
-
-    Args:
-        p_human: {translation: weight}
-        p_llm:   {translation: probability}
-        ks: WR@K 的 K 值列表
-
-    Returns:
-        dict with all metrics
-    """
+    """对单个 prompt 计算所有指标"""
     rho = spearman_correlation(p_human, p_llm)
     js = js_divergence(p_human, p_llm)
     wr = {f"wr@{k}": weighted_recall_at_k(p_human, p_llm, k) for k in ks}
@@ -223,16 +136,7 @@ def evaluate_prompt(p_human: dict, p_llm: dict, ks=(1, 5, 10, 20)) -> dict:
 
 
 def evaluate_dataset(prompts_human: list[dict], prompts_llm: list[dict]) -> dict:
-    """
-    对整个数据集（多个 prompt）计算汇总指标。
-
-    Args:
-        prompts_human: list of {translation: weight} per prompt
-        prompts_llm:   list of {translation: probability} per prompt
-
-    Returns:
-        dict with aggregated metrics
-    """
+    """对整个数据集（多个 prompt）计算汇总指标"""
     all_results = []
     all_p_human_flat = []
     all_p_llm_flat = []
@@ -247,7 +151,6 @@ def evaluate_dataset(prompts_human: list[dict], prompts_llm: list[dict]) -> dict
             all_p_human_flat.append(ph[t])
             all_p_llm_flat.append(pl[t])
 
-    # 汇总
     rhos = [r["spearman_rho"] for r in all_results if not np.isnan(r["spearman_rho"])]
     jss = [r["js_divergence"] for r in all_results]
 

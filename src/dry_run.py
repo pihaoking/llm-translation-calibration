@@ -1,7 +1,4 @@
-"""
-端到端 dry run: 用随机数据模拟 LLM 输出，验证整条管线。
-不需要 API key。
-"""
+"""端到端 dry run: 用随机数据模拟 LLM 输出，验证整条管线"""
 
 import json
 import random
@@ -19,11 +16,7 @@ RESULTS_DIR = BASE_DIR / "results"
 
 
 def simulate_llm_output(gold_prompts, noise_level=0.3):
-    """
-    模拟 LLM 输出: 在人类分布上加噪声。
-
-    noise_level: 0 = 完美校准, 1 = 完全随机
-    """
+    """模拟 LLM 输出: 在人类分布上加噪声"""
     simulated = []
 
     for prompt in gold_prompts:
@@ -35,13 +28,11 @@ def simulate_llm_output(gold_prompts, noise_level=0.3):
         sorted_trans = sorted(p_human.items(), key=lambda x: -x[1])
         kept = dict(sorted_trans[:n_keep])
 
-        # 加噪声
         p_llm = {}
         for t, w in kept.items():
             noisy_w = w * (1 - noise_level) + random.random() * noise_level
             p_llm[t] = max(noisy_w, 1e-6)
 
-        # 归一化
         total = sum(p_llm.values())
         p_llm = {t: w / total for t, w in p_llm.items()}
 
@@ -76,7 +67,6 @@ def main():
         with open(sim_path, "w", encoding="utf-8") as f:
             json.dump(simulated, f, ensure_ascii=False, indent=2)
 
-        # 评估
         prompts_human = []
         prompts_llm = []
         for gp, sp in zip(gold_prompts, simulated):

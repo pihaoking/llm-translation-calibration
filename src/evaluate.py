@@ -1,8 +1,6 @@
-"""
-评估脚本: 读取 LLM 结果 + STAPLE gold 数据，计算校准性指标并生成图表。
+"""评估脚本: 读取 LLM 结果 + STAPLE gold 数据，计算校准性指标并生成图表
 
-用法:
-  python src/evaluate.py --result results/sampling_gpt-4o_en_pt_dev_t1.0_n100.json --lang en_pt --split dev
+python src/evaluate.py --result results/sampling_gpt-4o_en_pt_dev_t1.0_n100.json --lang en_pt --split dev
 """
 
 import argparse
@@ -38,21 +36,17 @@ def load_result(result_path):
 
 
 def run_evaluation(result_path, lang, split, label=None):
-    """
-    对一组 LLM 结果运行完整评估。
-    """
+    """对一组 LLM 结果运行完整评估"""
     gold_data = load_gold(lang, split)
     llm_results = load_result(result_path)
 
     if label is None:
         label = Path(result_path).stem
 
-    # 构建 prompt_id → gold 映射
     gold_map = {}
     for p in gold_data:
         gold_map[p["prompt_id"]] = {t["text"]: t["weight"] for t in p["translations"]}
 
-    # 逐 prompt 评估
     per_prompt_results = []
     all_p_human_flat = []
     all_p_llm_flat = []
@@ -76,7 +70,6 @@ def run_evaluation(result_path, lang, split, label=None):
             all_p_human_flat.append(p_human[t])
             all_p_llm_flat.append(p_llm[t])
 
-    # 汇总指标
     rhos = [r["spearman_rho"] for r in per_prompt_results if not np.isnan(r["spearman_rho"])]
     jss = [r["js_divergence"] for r in per_prompt_results]
     wr1 = [r["wr@1"] for r in per_prompt_results]
@@ -84,13 +77,11 @@ def run_evaluation(result_path, lang, split, label=None):
     wr10 = [r["wr@10"] for r in per_prompt_results]
     wr20 = [r["wr@20"] for r in per_prompt_results]
 
-    # ECE
     ece = 0.0
     ece_bins = []
     if all_p_human_flat:
         ece, ece_bins = expected_calibration_error(all_p_human_flat, all_p_llm_flat)
 
-    # 失败模式
     modes = [r["failure_mode"] for r in per_prompt_results]
     mode_counts = {}
     for m in modes:
@@ -113,7 +104,6 @@ def run_evaluation(result_path, lang, split, label=None):
         "failure_modes": mode_counts,
     }
 
-    # 打印
     print()
     print(f"  Evaluation: {label}")
     print(f"  Lang: {lang}, Split: {split}, Prompts: {summary['n_prompts']}")
@@ -126,13 +116,11 @@ def run_evaluation(result_path, lang, split, label=None):
     print(f"  WR@20:          {summary['wr@20']:.4f}")
     print(f"  Failure modes:  {mode_counts}")
 
-    # 生成图表
     plot_reliability_diagram(ece_bins, label)
     plot_rho_distribution(rhos, label)
     plot_js_distribution(jss, label)
     plot_failure_modes(mode_counts, label)
 
-    # 保存评估结果
     eval_output = BASE_DIR / "results" / f"eval_{label}.json"
     with open(eval_output, "w") as f:
         json.dump(summary, f, indent=2)

@@ -1,17 +1,7 @@
-"""
-LLM Sampling 管线 (路线 B)。
+"""LLM Sampling 管线 (路线 B)
 
-对每个 prompt 做 N 次独立采样翻译，统计频率得到 P_LLM_sample(t|s)。
-适用于所有 LLM（包括不提供 logprobs 的 Claude）。
-
-支持:
-  - OpenAI GPT-4o
-  - Anthropic Claude Sonnet
-  - 可扩展其他 API
-
-用法:
-  python src/llm_sampling.py --lang en_pt --split dev --model gpt-4o --n_samples 50 --max_prompts 10
-  python src/llm_sampling.py --lang en_pt --split dev --model claude-sonnet --n_samples 50 --max_prompts 10
+python src/llm_sampling.py --lang en_pt --split dev --model gpt-4o --n_samples 50 --max_prompts 10
+python src/llm_sampling.py --lang en_pt --split dev --model claude-sonnet --n_samples 50 --max_prompts 10
 """
 
 import argparse
@@ -35,7 +25,6 @@ LANG_NAMES = {
     "en_vi": "Vietnamese",
 }
 
-# 模型到 provider 的映射
 MODEL_PROVIDERS = {
     "gpt-4o": "openai",
     "gpt-4o-mini": "openai",
@@ -68,7 +57,6 @@ def sample_anthropic(client, english: str, lang: str, model: str, temperature: f
     """用 Anthropic API 生成一次翻译"""
     target_lang = LANG_NAMES[lang]
 
-    # 模型名映射
     model_map = {
         "claude-sonnet": "claude-sonnet-4-20250514",
         "claude-haiku": "claude-haiku-4-5-20251001",
@@ -97,17 +85,7 @@ def sample_translations(
     client_anthropic=None,
     rate_limit_delay: float = 0.05,
 ) -> dict:
-    """
-    对一个 prompt 采样 N 次翻译，返回频率分布。
-
-    Returns:
-        {
-            "p_llm": {translation: frequency, ...},
-            "samples": [list of all sampled translations],
-            "unique_count": int,
-            "in_gold_count": int  (需要后续计算)
-        }
-    """
+    """对一个 prompt 采样 N 次翻译，返回频率分布"""
     provider = MODEL_PROVIDERS.get(model, "openai")
     samples = []
 
@@ -126,7 +104,6 @@ def sample_translations(
 
         time.sleep(rate_limit_delay)
 
-    # 统计频率
     counter = Counter(samples)
     total = len(samples)
     p_llm = {t: count / total for t, count in counter.items()} if total > 0 else {}
@@ -145,7 +122,6 @@ def run_sampling(lang, split, model, n_samples, temperature, max_prompts=None, r
     if max_prompts:
         prompts = prompts[:max_prompts]
 
-    # 初始化客户端
     client_openai = None
     client_anthropic = None
     provider = MODEL_PROVIDERS.get(model, "openai")
@@ -190,12 +166,10 @@ def run_sampling(lang, split, model, n_samples, temperature, max_prompts=None, r
             "phantom_mass": phantom_mass,
         })
 
-    # 保存结果
     output_file = RESULTS_DIR / f"sampling_{model}_{lang}_{split}_t{temperature}_n{n_samples}.json"
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
 
-    # 汇总统计
     avg_unique = sum(r["unique_count"] for r in results) / len(results)
     avg_phantom = sum(r["phantom_mass"] for r in results) / len(results)
     avg_in_gold = sum(r["in_gold_count"] for r in results) / len(results)

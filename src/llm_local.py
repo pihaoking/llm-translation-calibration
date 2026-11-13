@@ -1,13 +1,7 @@
-"""
-本地模型多翻译管线 (via Ollama)。
+"""本地模型多翻译管线 (via Ollama)
 
-通过 Ollama 的 OpenAI-compatible API 调用本地模型。
-
-支持: phi4:14b, gemma2:27b, llama3.2, qwen2.5:7b 等 Ollama 模型
-
-用法:
-  python src/llm_local.py --lang en_pt --split dev --model phi4:14b --max_prompts 5
-  python src/llm_local.py --lang en_pt --split dev --model gemma2:27b --max_prompts 5
+python src/llm_local.py --lang en_pt --split dev --model phi4:14b --max_prompts 5
+python src/llm_local.py --lang en_pt --split dev --model gemma2:27b --max_prompts 5
 """
 
 import argparse
@@ -67,12 +61,10 @@ def parse_translations(response_text: str) -> list[str]:
         # 跳过明显的非翻译行 (解释、注释等)
         if any(line.lower().startswith(w) for w in ["note:", "here", "these", "the ", "i ", "above"]):
             continue
-        # 去掉编号
         cleaned = re.sub(r"^\d+[\.\)\:\-]\s*", "", line)
         # 去掉 markdown bold/italic
         cleaned = re.sub(r"\*+", "", cleaned)
         cleaned = cleaned.strip().lower()
-        # 去掉引号
         cleaned = cleaned.strip('"').strip("'").strip('\u201c').strip('\u201d')
         # 去掉括号注释 (informal) 等
         cleaned = re.sub(r"\s*\(.*?\)\s*$", "", cleaned)
@@ -118,7 +110,6 @@ def generate_translations_ollama(
     raw_text = data["message"]["content"]
     translations = parse_translations(raw_text)
 
-    # 去重 (保持顺序)
     seen = set()
     unique = []
     for t in translations:
@@ -126,7 +117,6 @@ def generate_translations_ollama(
             seen.add(t)
             unique.append(t)
 
-    # 排名 → 概率
     if unique:
         probs = rank_to_probability(len(unique))
         p_llm = {t: p for t, p in zip(unique, probs)}
@@ -194,12 +184,10 @@ def run_local(lang, split, model, max_prompts=None):
             "phantom_mass": phantom_mass,
         })
 
-    # 保存
     output_file = RESULTS_DIR / f"multi_{model_safe}_{lang}_{split}.json"
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
 
-    # 汇总
     avg_gen = np.mean([r["n_generated"] for r in results])
     avg_gold = np.mean([r["n_in_gold"] for r in results])
     avg_phantom = np.mean([r["phantom_mass"] for r in results])

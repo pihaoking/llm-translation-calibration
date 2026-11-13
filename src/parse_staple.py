@@ -1,31 +1,10 @@
-"""
-解析 STAPLE gold 文件为结构化 JSON 格式。
-
-输入: staple-2020/{lang}/{split}.{lang}.*.gold.txt
-输出: data/processed/{lang}_{split}.json
-
-每个 JSON 文件是一个 list，每个元素对应一个 prompt:
-{
-    "prompt_id": "6ab4e5d4...",
-    "english": "could you download that video for me?",
-    "translations": [
-        {"text": "você poderia baixar ...", "weight": 0.1369},
-        ...
-    ],
-    "num_translations": 135,
-    "entropy": 4.23,
-    "top1_weight": 0.1369,
-    "top5_weight": 0.43,
-    "top10_weight": 0.52
-}
-"""
+"""解析 STAPLE gold 文件为结构化 JSON 格式"""
 
 import json
 import math
 import os
 from pathlib import Path
 
-# 路径配置
 BASE_DIR = Path(__file__).resolve().parents[1]
 STAPLE_DIR = BASE_DIR / "2020 STAPLE Shared Task Data" / "staple-2020"
 OUTPUT_DIR = BASE_DIR / "data" / "processed"
@@ -40,11 +19,7 @@ def compute_entropy(weights):
 
 
 def parse_gold_file(filepath):
-    """
-    解析一个 STAPLE gold 文件。
-
-    返回 list of dict，每个 dict 对应一个 prompt。
-    """
+    """解析一个 STAPLE gold 文件"""
     prompts = []
     current_prompt = None
     current_translations = []
@@ -80,7 +55,6 @@ def parse_gold_file(filepath):
                     "weight": float(parts[1]),
                 })
 
-    # 文件末尾
     if current_prompt is not None:
         prompts.append(_build_prompt_dict(current_prompt, current_translations))
 
@@ -131,7 +105,6 @@ def main():
             with open(output_file, "w", encoding="utf-8") as f:
                 json.dump(prompts, f, ensure_ascii=False, indent=2)
 
-            # 摘要统计
             n_prompts = len(prompts)
             n_trans = sum(p["num_translations"] for p in prompts)
             avg_trans = n_trans / n_prompts if n_prompts else 0

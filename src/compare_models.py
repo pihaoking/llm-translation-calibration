@@ -1,10 +1,6 @@
-"""
-跨模型对比分析脚本。
+"""跨模型对比分析脚本
 
-读取多个模型的评估结果，生成对比表格和图表。
-
-用法:
-  python src/compare_models.py --lang en_pt --split dev
+python src/compare_models.py --lang en_pt --split dev
 """
 
 import argparse
@@ -28,7 +24,6 @@ RESULTS_DIR = BASE_DIR / "results"
 FIG_DIR = BASE_DIR / "figures"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
-# 模型显示名 → 结果文件模式
 MODEL_CONFIGS = {
     "Claude Haiku": "multi_claude-haiku",
     "Llama 3.2 3B": "multi_llama3.2-latest",
@@ -298,7 +293,6 @@ def main():
 
     gold_data = load_gold(args.lang, args.split)
 
-    # 找到所有可用的模型结果
     summaries = []
     all_per_prompt = {}
 
@@ -308,7 +302,6 @@ def main():
             print(f"  Skipping {model_name} (no result file: {result_file.name})")
             continue
 
-        # 检查是否有有效数据
         with open(result_file) as f:
             data = json.load(f)
         valid = sum(1 for r in data if r.get("n_generated", 0) > 0)
@@ -328,10 +321,8 @@ def main():
             print_latex_table(summaries)
         return
 
-    # 按 Spearman ρ 排序
     summaries.sort(key=lambda s: s["spearman_rho"] or 0, reverse=True)
 
-    # 打印汇总
     print()
     print(f"  CROSS-MODEL COMPARISON: {args.lang} ({args.split})")
     print(f"{'Model':<20} {'Params':>8} {'ρ':>8} {'JS':>8} {'ECE':>8} {'WR@10':>8} {'Phantom':>8} {'Good':>8}")
@@ -342,17 +333,14 @@ def main():
               f"{s['ece']:>8.3f} {s['wr@10']:>8.3f} "
               f"{s['phantom_rate']:>7.1%} {s['well_calibrated_rate']:>7.1%}")
 
-    # 生成图表
     print("\nGenerating comparison plots...")
     plot_metric_comparison(summaries, args.lang, args.split)
     plot_rho_violin(all_per_prompt, args.lang, args.split)
     plot_failure_modes_stacked(summaries, args.lang, args.split)
     plot_params_vs_calibration(summaries, args.lang, args.split)
 
-    # LaTeX 表格
     print_latex_table(summaries)
 
-    # 保存汇总 JSON
     output_summaries = [{k: v for k, v in s.items() if k not in ("rhos", "jss")}
                         for s in summaries]
     output_file = RESULTS_DIR / f"compare_{args.lang}_{args.split}.json"

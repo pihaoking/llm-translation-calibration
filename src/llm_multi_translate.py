@@ -1,12 +1,7 @@
-"""
-LLM 多翻译管线。
+"""LLM 多翻译管线
 
-每个 prompt 一次 API 调用，让模型生成尽可能多的合理翻译变体。
-用排名 + 指数衰减构建概率分布。
-
-用法:
-  python src/llm_multi_translate.py --lang en_pt --split dev --model claude-haiku --max_prompts 5
-  python src/llm_multi_translate.py --lang en_pt --split dev --model gpt-4o-mini --max_prompts 5
+python src/llm_multi_translate.py --lang en_pt --split dev --model claude-haiku --max_prompts 5
+python src/llm_multi_translate.py --lang en_pt --split dev --model gpt-4o-mini --max_prompts 5
 """
 
 import argparse
@@ -77,7 +72,6 @@ def parse_translations(response_text: str) -> list[str]:
         # 去掉编号 (1. / 1) / 1: 等格式)
         cleaned = re.sub(r"^\d+[\.\)\:\-]\s*", "", line)
         cleaned = cleaned.strip().lower()
-        # 去掉引号
         cleaned = cleaned.strip('"').strip("'").strip('"').strip('"')
         if cleaned:
             translations.append(cleaned)
@@ -85,16 +79,7 @@ def parse_translations(response_text: str) -> list[str]:
 
 
 def rank_to_probability(n_translations: int, decay: float = 0.7) -> list[float]:
-    """
-    用指数衰减将排名转为概率分布。
-
-    rank 1 → weight 1.0
-    rank 2 → weight decay
-    rank 3 → weight decay^2
-    ...
-
-    然后归一化为概率。
-    """
+    """用指数衰减将排名转为概率分布"""
     weights = [decay ** i for i in range(n_translations)]
     total = sum(weights)
     return [w / total for w in weights]
@@ -107,9 +92,7 @@ def generate_translations(
     model: str,
     provider: str,
 ) -> dict:
-    """
-    一次 API 调用生成多个翻译。支持 Anthropic 和 OpenAI。
-    """
+    """一次 API 调用生成多个翻译。支持 Anthropic 和 OpenAI"""
     target_lang = LANG_NAMES[lang]
     api_model = MODEL_MAP.get(model, model)
     sys_msg = SYSTEM_PROMPT.format(target_lang=target_lang)
@@ -142,7 +125,6 @@ def generate_translations(
 
     translations = parse_translations(raw_text)
 
-    # 去重 (保持顺序)
     seen = set()
     unique = []
     for t in translations:
@@ -150,7 +132,6 @@ def generate_translations(
             seen.add(t)
             unique.append(t)
 
-    # 排名 → 概率
     if unique:
         probs = rank_to_probability(len(unique))
         p_llm = {t: p for t, p in zip(unique, probs)}
@@ -229,12 +210,10 @@ def run_multi_translate(lang, split, model, max_prompts=None, rate_limit_delay=0
 
         time.sleep(rate_limit_delay)
 
-    # 保存
     output_file = RESULTS_DIR / f"multi_{model}_{lang}_{split}.json"
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
 
-    # 汇总
     avg_gen = np.mean([r["n_generated"] for r in results])
     avg_gold = np.mean([r["n_in_gold"] for r in results])
     avg_phantom = np.mean([r["phantom_mass"] for r in results])
@@ -243,7 +222,6 @@ def run_multi_translate(lang, split, model, max_prompts=None, rate_limit_delay=0
         for r in results
     ])
 
-    # 成本估算
     cost_input = total_input_tokens / 1_000_000 * (1.0 if "haiku" in model else 3.0)
     cost_output = total_output_tokens / 1_000_000 * (5.0 if "haiku" in model else 15.0)
     total_cost = cost_input + cost_output
